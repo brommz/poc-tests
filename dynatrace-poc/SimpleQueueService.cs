@@ -1,28 +1,32 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Diagnostics;
+using OpenTelemetry;
 
 namespace dynatrace_poc 
 {
     internal class SimpleQueueService 
     {
-        private static ActivitySource activitySource = new ActivitySource("POC", "semver1.0.0");
-
+        private static ActivitySource ActivitySource = new ActivitySource(TelemetryConsts.ServiceName);
         private static ConcurrentQueue<WeatherForecast> GlobalQueue = new ConcurrentQueue<WeatherForecast>();
-        private Thread _worker;
+        private static Thread Worker;
 
         public SimpleQueueService() 
         {
-            _worker = new Thread(() =>
+            Worker = new Thread(() =>
                 {
-                    if (GlobalQueue.TryDequeue(out var r))
+                    while(true) 
                     {
-                        var parentId = r.ActivityId;
-                        using var activity = activitySource.StartActivity("Dequeue", ActivityKind.Internal, parentId);
-                        Thread.Sleep(300);
+                        if (GlobalQueue.TryDequeue(out var r))
+                        {
+                            var parentId = r.ActivityId;
+                            using var activity = ActivitySource.StartActivity("Dequeue", ActivityKind.Consumer, parentId);
+                            activity.AddTag("tempC", r.TemperatureC);
+                        }
+                        Thread.Sleep(3000);
                     }
                 });
-            _worker.Start();
+            Worker.Start();
         }
 
         public void Enqueue(WeatherForecast forecast) 

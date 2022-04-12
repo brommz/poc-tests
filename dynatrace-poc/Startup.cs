@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -20,9 +21,6 @@ namespace dynatrace_poc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var serviceName = "POC";
-            var serviceVersion = "1.0.0";
-
             services.AddControllers();
             services.AddSwaggerGen();
 
@@ -31,10 +29,10 @@ namespace dynatrace_poc
                 builder
                 .AddJaegerExporter()
                 .AddConsoleExporter()
-                .AddSource(serviceName)
+                .AddSource(TelemetryConsts.ServiceName)
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
-                        .AddService(serviceName, serviceVersion))
+                        .AddService(TelemetryConsts.ServiceName, "1.0.0"))
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation();
             });
@@ -48,7 +46,7 @@ namespace dynatrace_poc
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseRouting();
 

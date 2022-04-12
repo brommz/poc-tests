@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using OpenTelemetry;
 
 namespace dynatrace_poc.Controllers
 {
@@ -11,7 +12,7 @@ namespace dynatrace_poc.Controllers
     [Route("/api")]
     public class WeatherForecastController : ControllerBase
     {
-        private static ActivitySource activitySource = new ActivitySource("POC");
+        private static ActivitySource ActivitySource = new ActivitySource(TelemetryConsts.ServiceName);
 
         private static readonly string[] Summaries = new[]
         {
@@ -19,18 +20,17 @@ namespace dynatrace_poc.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly SimpleQueueService _simpleQueue;
+        private static SimpleQueueService SimpleQueue = new SimpleQueueService();
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
-            _simpleQueue = new SimpleQueueService();
         }
 
         [HttpGet(Name = "Get")]
         public IEnumerable<WeatherForecast> Get()
         {
-            using var activity = activitySource.StartActivity("Get weather", ActivityKind.Server);
+            using var activity = ActivitySource.StartActivity("Get weather", ActivityKind.Producer);
             var forecast = Enumerable.Range(1, 5).Select(index => 
                 new WeatherForecast
                 {
@@ -42,7 +42,7 @@ namespace dynatrace_poc.Controllers
             .ToArray();
 
             foreach (var f in forecast)
-                _simpleQueue.Enqueue(f);
+                SimpleQueue.Enqueue(f);
 
             return forecast;
         }
