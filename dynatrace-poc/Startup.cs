@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,13 +27,17 @@ namespace dynatrace_poc
 
             services.AddOpenTelemetryTracing(builder =>
             {
+                var attributes = new List<KeyValuePair<string, object>>();
+                attributes.Add(new KeyValuePair<string, object>("tag", "tagValue"));
                 builder
                 .AddJaegerExporter()
                 .AddConsoleExporter()
                 .AddSource(TelemetryConsts.ServiceName)
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
-                        .AddService(TelemetryConsts.ServiceName, "1.0.0"))
+                        .AddService(TelemetryConsts.ServiceName, "1.0.0")
+                        .AddAttributes(attributes)
+                        )
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation();
             });
