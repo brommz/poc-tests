@@ -39,7 +39,7 @@ namespace dynatrace_poc
                 .SetSampler(new AlwaysOnSampler())
                 .AddSource(TelemetryConsts.ServiceName)
                 .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault()
+                    ResourceBuilder.CreateEmpty()
                         .AddService(TelemetryConsts.ServiceName)
                         .AddAttributes(attributes)
                         )
