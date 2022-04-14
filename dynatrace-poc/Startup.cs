@@ -32,10 +32,11 @@ namespace dynatrace_poc
                 builder
                 .AddJaegerExporter()
                 .AddConsoleExporter()
+                .SetSampler(new AlwaysOnSampler())
                 .AddSource(TelemetryConsts.ServiceName)
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
-                        .AddService(TelemetryConsts.ServiceName, "1.0.0")
+                        .AddService(TelemetryConsts.ServiceName)
                         .AddAttributes(attributes)
                         )
                 .AddHttpClientInstrumentation()
