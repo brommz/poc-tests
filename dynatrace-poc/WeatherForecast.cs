@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace dynatrace_poc
 {
@@ -13,5 +14,6 @@ namespace dynatrace_poc
         public string Summary { get; set; }
 
         public string ActivityId { get; set; }
+        public ActivityKind ActivityKind { get; set; } 
     }
 }
